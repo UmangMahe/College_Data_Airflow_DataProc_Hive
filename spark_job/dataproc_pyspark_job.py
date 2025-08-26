@@ -1,6 +1,6 @@
 import argparse
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, count, avg, when, lit, expr
+from pyspark.sql.functions import col, count, avg, when, lit, expr, round
 import logging
 import sys
 
@@ -49,14 +49,29 @@ def main(gcs_bucket):
         total_placements = college_data.groupBy("college_id").agg(
             count(when(col("Placement") == "Yes", 1)).alias("total_placements"), 
             count(when(col("Placement") == "No", 1)).alias("total_non_placements"),
-            col("total_placements") / (col("total_placements") + col("total_non_placements")).alias("placement_rate")
-        )
+            round(100 * col("total_placements") / (col("total_placements") + col("total_non_placements")), 2).alias("placement_rate")
+        ).orderBy("placement_rate", ascending=False)
+        
+        #2 Placements with and without Internship 
+        
+        college_data.createOrReplaceTempView("college_data")
 
+        query = """ select Internship_Experience, sum(case when Placement = 'Yes' then 1 else 0 end) as total_placements from college_data group by Internship_Experience"""
+        internship_placements = spark.sql(query)
+        
+        #3 Students who got placed per academic performance
+
+        query = """ select Academic_Performance, sum(case when Placement = 'Yes' then 1 else 0 end) as total_placements from college_data group by Academic_Performance order by 1 asc"""
+        academic_performance = spark.sql(query)
+        
+        
         logger.info("Data transformations completed.")
 
         # Write transformed data to Hive
         
         total_placements.write.format("hive").mode("append").saveAsTable("airflow_assignment_1.total_placements")
+        internship_placements.write.format("hive").mode("append").saveAsTable("airflow_assignment_1.internship_placements")
+        academic_performance.write.format("hive").mode("append").saveAsTable("airflow_assignment_1.academic_performance")
 
         logger.info("Data written to Hive successfully.")
 
