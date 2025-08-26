@@ -34,11 +34,15 @@ jobs:
         with:
           project_id: '${{ secrets.PROJECT_ID }}'
 
+      - name: Upload file to GCS
+        run: |
+          gsutil cp variables/variables.json gs://us-central1-airflow-demo-tr-3bd62331-bucket/data/variables.json
+          
       - name: Import Airflow Variables
         run: |
           gcloud composer environments run airflow-demo-training \
             --location us-central1 \
-              variables import -- variables/variables.json
+              variables import -- /home/airflow/gcs/data/dev/variables.json
 
       - name: Upload Spark Job to GCS
         run: |
