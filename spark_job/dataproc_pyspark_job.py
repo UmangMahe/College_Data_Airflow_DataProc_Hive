@@ -18,6 +18,7 @@ def main(gcs_bucket):
         spark = SparkSession.builder \
             .appName("DataProcessingandHiveTable") \
             .config("spark.sql.catalogImplementation", "hive") \
+            .config("spark.sql.warehouse.dir", f"gs://{gcs_bucket}/airflow-project-2/hive_data/") \
             .enableHiveSupport() \
             .getOrCreate()
 
