@@ -1,0 +1,4 @@
+{
+  "gcs_bucket": "airflow-projects-learning",
+  "bq_project": "healthy-splice-469717-n5"
+}

@@ -1,0 +1,52 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "master" branch
+  push:
+    branches: [ "main","dev" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  upload_to_main:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+
+      # Runs a single command using the runners shell
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v1'
+        with:
+          project_id: '${{ secrets.PROJECT_ID }}'
+
+      - name: Import Airflow Variables
+        run: |
+          gcloud composer environments run airflow-demo-training \
+            --location us-central1 \
+              variables import -- variables/variables.json
+
+      - name: Upload Spark Job to GCS
+        run: |
+          gsutil cp spark_job/dataproc_pyspark_job.py gs://airflow-projects-learning/airflow-project-2/spark-job/dataproc_pyspark_job.py
+
+      - name: Upload Airflow DAG to Airflow Dev GCS
+        run: |
+          gcloud composer environments storage dags import \
+            --environment airflow-demo-training \
+            --location us-central1 \
+            --source airflow_job_dag/gcp_dataproc_pyspark_dag.py
