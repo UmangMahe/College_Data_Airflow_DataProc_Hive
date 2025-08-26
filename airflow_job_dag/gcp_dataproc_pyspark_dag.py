@@ -36,6 +36,7 @@ with DAG(
         task_id="check_file_arrival",
         bucket=gcs_bucket,
         object=f"airflow-project-2/data/*.csv",
+        use_glob=True,
         google_cloud_conn_id="google_cloud_default",  # GCP connection
         timeout=43200,  # Timeout in seconds
         poke_interval=300,  # Time between checks
