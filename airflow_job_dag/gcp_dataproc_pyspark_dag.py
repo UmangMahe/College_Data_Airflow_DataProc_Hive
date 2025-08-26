@@ -77,7 +77,6 @@ with DAG(
         "pyspark_job": {
             "main_python_file_uri": f"gs://{gcs_bucket}/airflow-project-2/spark-job/dataproc_pyspark_job.py",
             "args": [
-                f"--gcp_project={gcp_project}",
                 f"--gcs_bucket={gcs_bucket}"
             ],
         },
@@ -96,7 +95,7 @@ with DAG(
         region=REGION,
         project_id=gcp_project,
         # Ensures cluster deletion runs regardless of previous task success or failure
-        trigger_rule=TriggerRule.ALL_DONE,
+        
     )
 
     # Task Dependencies

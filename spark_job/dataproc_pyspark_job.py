@@ -11,7 +11,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-def main(extension, gcp_project, gcs_bucket):
+def main(gcs_bucket):
     spark = None
     try:
         # Initialize SparkSession
@@ -40,7 +40,7 @@ def main(extension, gcp_project, gcs_bucket):
         # Data transformations
         logger.info("Starting data transformations.")
 
-        sql_query = """ CREATE DATABASE IF NOT EXISTS airflow_assignment_1"""
+        sql_query = "CREATE DATABASE IF NOT EXISTS airflow_assignment_1"
         spark.sql(sql_query)
 
         #1 Total Placements by College IDs
@@ -72,15 +72,11 @@ def main(extension, gcp_project, gcs_bucket):
 if __name__ == "__main__":
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description="Process Data and write to Hive Table.")
-    parser.add_argument("--extension", required=True, help="File extension (e.g., csv, json)")
-    parser.add_argument("--gcp_project", required=True, help="GCP project ID")
     parser.add_argument("--gcs_bucket", required=True, help="GCS bucket name")
 
     args = parser.parse_args()
 
     # Call the main function with parsed arguments
     main(
-        extension=args.extension,
-        gcp_project=args.gcp_project,
         gcs_bucket=args.gcs_bucket
     )
