@@ -42,7 +42,7 @@ jobs:
         run: |
           gcloud composer environments run airflow-demo-training \
             --location us-central1 \
-              variables import -- /home/airflow/gcs/data/dev/variables.json
+              variables import -- /home/airflow/gcs/data/variables.json
 
       - name: Upload Spark Job to GCS
         run: |
