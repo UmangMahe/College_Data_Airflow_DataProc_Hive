@@ -99,4 +99,4 @@ with DAG(
     )
 
     # Task Dependencies
-    file_sensor >> pyspark_job >> delete_cluster
+    file_sensor >> create_cluster >> pyspark_job >> delete_cluster
